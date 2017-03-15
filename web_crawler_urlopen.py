@@ -1,8 +1,6 @@
 from html.parser import HTMLParser
-from urllib.request import Request
 from urllib.request import urlopen
 from urllib import parse
-import requests
 
 # We are going to create a class called LinkParser that inherits some
 # methods from HTMLParser which is why it is passed into the definition
@@ -35,14 +33,12 @@ class LinkParser(HTMLParser):
         # Remember the base URL which will be important when creating
         # absolute URLs
         self.baseUrl = url
-
-        # Use the urlopen function from the standard Python 3 library
-        r = requests.get(url)
+        response = urlopen(url)
         # Make sure that we are looking at HTML and not other things that
         # are floating around on the internet (such as
         # JavaScript files, CSS, or .PDFs for example)
-        if r.headers['Content-Type']=='text/html; charset=utf-8':
-            htmlBytes = r.content
+        if response.getheader('Content-Type') == 'text/html; charset=utf-8':
+            htmlBytes = response.read()
             # Note that feed() handles Strings well, but not bytes
             # (A change from Python 2.x to Python 3.x)
             htmlString = htmlBytes.decode("utf-8")
@@ -63,7 +59,8 @@ class LinkParser(HTMLParser):
         # (this is useful for searching for the word)
         # and we return a set of links from that web page
         # (this is useful for where to go next)
-        while numberVisited < maxPages and pagesToVisit != [] and not foundWord:
+        while numberVisited < maxPages and pagesToVisit != []:
+        #while numberVisited < maxPages and pagesToVisit != [] and not foundWord:
             numberVisited = numberVisited +1
             # Start from the beginning of our collection of pages to visit:
             url = pagesToVisit[0]
@@ -84,5 +81,6 @@ class LinkParser(HTMLParser):
             print("The word", word, "was found at", url)
         else:
             print("Word never found")
+
 LinkParser.spider("http://www.delfi.ee/","kaabakad",100)
 
